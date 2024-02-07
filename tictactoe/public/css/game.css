@@ -1,0 +1,56 @@
+.body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.contenedor {
+    display: flex;
+    flex-direction: column; /* Para apilar los elementos verticalmente */
+    align-items: center; /* Centrar horizontalmente */
+    justify-content: center; /* Centrar verticalmente */
+    height: 100vh; /* Altura del viewport */
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 150px); /* Reducción del tamaño de las celdas */
+    grid-template-rows: repeat(3, 150px); /* Reducción del tamaño de las celdas */
+    gap: 5px; /* Reducción del espacio entre las celdas */
+    border: 2px solid #ccc; /* Añade un borde al tablero */
+    border-radius: 10px; /* Añade bordes redondeados al tablero */
+    background-color: #fff; /* Cambia el color de fondo del tablero */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Añade una sombra al tablero */
+    margin-bottom: 20px; /* Añade espacio entre el tablero y el botón */
+}
+
+.cell {
+    width: 150px; /* Ajusta el tamaño de la celda */
+    height: 150px; /* Ajusta el tamaño de la celda */
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    cursor: pointer;
+}
+
+
+.cell:hover {
+    background-color: #f9a9f9; /* Cambia el color de fondo al pasar el ratón */
+}
+
+.start-button {
+    padding: 10px 20px; /* Ajusta el tamaño del botón */
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.start-button:hover {
+    background-color: #0056b3; /* Cambia el color de fondo al pasar el ratón */
+}
