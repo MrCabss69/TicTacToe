@@ -1,6 +1,6 @@
 # Tic Tac Toe
 
-This project is a web implementation of the classic Tic Tac Toe game, allowing players to interact with a 3x3 board and play against another player on the same device. The backend is built with Laravel, taking advantage of its capabilities to handle game state, while the frontend uses pure JavaScript to interact with the user and communicate with the server.
+This project is a web implementation of the classic Tic Tac Toe game, allowing players to interact with a 3x3 board and play against another player on the same device. The backend is built with Laravel, taking advantage of its capabilities to handle game state, while the frontend uses Angular to interact with the user and communicate with the server.
 
 ## Characteristics
 
