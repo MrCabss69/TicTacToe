@@ -2,6 +2,10 @@
 
 This project is a web implementation of the classic Tic Tac Toe game, allowing players to play against an automated bot. The backend is built with Laravel, leveraging its features for game state management, and a Python bot that uses a Minimax algorithm with alpha-beta pruning to determine its moves. The frontend is responsible for the interactive user interface, facilitating player interaction with the game board.
 
+![Example](o.gif)
+
+
+
 ## Characteristics
 
 - Single-player Tic Tac Toe game against an intelligent bot.
@@ -35,9 +39,8 @@ This project is a web implementation of the classic Tic Tac Toe game, allowing p
     /routes
         web.php
 /python_bot
-    bot.py  # Main bot logic using Minimax algorithm
-    requirements.txt  # Python dependencies
-
+    brain.py  # Main bot logic using Minimax algorithm
+    bot.py    # flask api - ¡¡RUN THIS!!
 ```
 
 ## Configuration and Installation
