@@ -1,127 +1,136 @@
 <?php
 
-    namespace App\Http\Controllers;
+namespace App\Http\Controllers;
 
-    use Illuminate\Http\Request;
-    use Illuminate\Support\Facades\Log;
-    use Illuminate\Support\Facades\Http;
-    use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Exception;
 
-    class GameController extends Controller
+class GameController extends Controller
+{
+    public function show()
     {
-        public function show()
-        {
-            return view('game');
+        return view('game');
+    }
+
+    public function start()
+    {
+        $gameId = uniqid('game_', true);
+        $games = session('games', []);
+        $games[$gameId] = ['board' => array_fill(0, 3, array_fill(0, 3, null)), 'currentPlayer' => 'X', 'status' => 'active', 'winner' => null];
+        session(['games' => $games]);
+        Log::info("Game started. Game ID: $gameId");
+        return response()->json(['success' => true, 'gameId' => $gameId, 'currentPlayer' => 'X']);
+    }
+
+    public function move(Request $request)
+    {
+        $validated = $request->validate([
+            'gameId' => 'required',
+            'row' => 'required|integer|between:0,2',
+            'col' => 'required|integer|between:0,2',
+        ]);
+
+        $gameId = $validated['gameId'];
+        $games = session('games', []);
+        $gameState = $games[$gameId] ?? null;
+
+        if (!$gameState || $gameState['status'] === 'finished') {
+            return response()->json(['success' => false, 'message' => 'Partida no válida o ya finalizada.']);
         }
 
-        public function start()
-        {
-            $gameId = uniqid('game_', true);
-            session([$gameId => ['board' => array_fill(0, 3, array_fill(0, 3, null)), 'currentPlayer' => 'X', 'status' => 'active']]);
-            Log::info("Game started. Game ID: $gameId");
-            return response()->json(['success' => true, 'gameId' => $gameId, 'currentPlayer' => 'X']);
+        $board = &$gameState['board'];
+        if ($board[$validated['row']][$validated['col']] !== null) {
+            return response()->json(['success' => false, 'message' => 'Casilla ya ocupada.']);
         }
 
-        public function move(Request $request)
-        {
-            $validated = $request->validate([
-                'gameId' => 'required',
-                'row' => 'required|integer|between:0,2',
-                'col' => 'required|integer|between:0,2',
-            ]);
+        // Realiza el movimiento del jugador
+        $board[$validated['row']][$validated['col']] = $gameState['currentPlayer'];
 
-            $gameId = $validated['gameId'];
-            $gameState = session()->get($gameId);
-
-            if (!$gameState || $gameState['status'] === 'finished') {
-                return response()->json(['success' => false, 'message' => 'Partida no válida o ya finalizada.'], 404);
-            }
-
-            $board = &$gameState['board'];
-            if ($board[$validated['row']][$validated['col']] !== null) {
-                return response()->json(['success' => false, 'message' => 'Casilla ya ocupada.']);
-            }
-
-            $board[$validated['row']][$validated['col']] = $gameState['currentPlayer'];
-            $winner = $this->checkWinner($board);
-
-            if ($winner) {
-                $gameState['status'] = 'finished';
-                $gameState['winner'] = $winner;
-            } else {
-                // Solo solicitar movimiento del bot si no hay ganador
-                $gameState = $this->requestBotMove($gameState, $gameId);
-            }
-
-            session([$gameId => $gameState]);
-
-            return response()->json(['success' => true, 'state' => $gameState]);
+        // Verifica si hay un ganador después del movimiento del jugador
+        $winner = $this->checkWinner($board);
+        if ($winner) {
+            $gameState['status'] = 'finished';
+            $gameState['winner'] = $winner;
+        } else {
+            $gameState = $this->requestBotMove($gameState, $gameId);
         }
 
-        public function requestBotMove($gameState, $gameId)
-        {
-            try {
-                $botResponse = Http::post('http://localhost:5000/move', ['board' => $gameState['board']]);
-                if ($botResponse->successful()) {
-                    $botMove = $botResponse->json();
-                    $board = &$gameState['board'];
-                    $row = $botMove['row'];
-                    $col = $botMove['col'];
+        $games[$gameId] = $gameState;
+        session(['games' => $games]);
 
-                    if ($board[$row][$col] === null) {
-                        $board[$row][$col] = 'O'; // Asume que el bot juega con 'O'
+        return response()->json(['success' => true, 'state' => $gameState]);
+    }
 
-                        $winner = $this->checkWinner($board);
-                        if ($winner) {
-                            $gameState['status'] = 'finished';
-                            $gameState['winner'] = $winner;
-                        }
+    public function requestBotMove($gameState, $gameId)
+    {
+        try {
+            $botResponse = Http::post('http://localhost:5000/move', ['board' => $gameState['board']]);
+            if ($botResponse->successful()) {
+                $botMove = $botResponse->json();
+                
+                // Comprobar si el bot ha devuelto un movimiento válido
+                $row = isset($botMove['row']) ? (int) $botMove['row'] : null;
+                $col = isset($botMove['col']) ? (int) $botMove['col'] : null;
+
+                // Verificar que row y col no son null y que la casilla está vacía
+                if ($row !== null && $col !== null && $gameState['board'][$row][$col] === null) {
+                    $gameState['board'][$row][$col] = 'O'; // Suponiendo que el bot juega como 'O'
+                    $winner = $this->checkWinner($gameState['board']); // Asumiendo que tienes esta función implementada
+                    
+                    if ($winner !== null) { // Asumiendo que checkWinner retorna null si no hay ganador aún
+                        $gameState['status'] = 'finished';
+                        $gameState['winner'] = $winner; // Asumiendo que checkWinner retorna 'X', 'O' o 'draw'
+                    } else if ($this->isBoardFull($gameState['board'])) { // Asumiendo que tienes esta función implementada
+                        // No hay ganador y el tablero está lleno, es un empate
+                        $gameState['status'] = 'finished';
+                        $gameState['winner'] = 'draw';
                     }
                 } else {
-                    throw new Exception('Error al solicitar movimiento al bot.');
+                    // Manejo del caso en que no haya movimientos válidos o el tablero esté lleno
+                    // Puedes decidir cómo manejar este caso, por ejemplo, marcándolo como empate o lanzando un error
                 }
-            } catch (Exception $e) {
-                Log::error('Error in requestBotMove: ' . $e->getMessage());
-                // Considera qué hacer en caso de fallo. ¿Reintentar, marcar el juego como finalizado, otro?
+            } else {
+                throw new Exception('Error al solicitar movimiento al bot.');
             }
-
-            // Cambia el turno de vuelta al jugador humano solo si el juego continúa
-            if ($gameState['status'] !== 'finished') {
-                $gameState['currentPlayer'] = 'X';
-            }
-
-            return $gameState;
+        } catch (Exception $e) {
+            Log::error('Error in requestBotMove: ' . $e->getMessage());
         }
+        return $gameState;
+}
 
-
-        private function checkWinner($board)
-        {
-            for ($i = 0; $i < 3; $i++) {
-                if ($board[$i][0] !== null &&
-                    $board[$i][0] === $board[$i][1] &&
-                    $board[$i][1] === $board[$i][2]) {
-                    return $board[$i][0];
-                }
-
-                if ($board[0][$i] !== null &&
-                    $board[0][$i] === $board[1][$i] &&
-                    $board[1][$i] === $board[2][$i]) {
-                    return $board[0][$i];
-                }
+    // Función adicional para comprobar si el tablero está lleno
+    protected function isBoardFull($board)
+    {
+        foreach ($board as $row) {
+            if (in_array(null, $row, true)) {
+                return false;
             }
-
-            if ($board[0][0] !== null &&
-                $board[0][0] === $board[1][1] &&
-                $board[1][1] === $board[2][2]) {
-                return $board[0][0];
-            }
-
-            if ($board[0][2] !== null &&
-                $board[0][2] === $board[1][1] &&
-                $board[1][1] === $board[2][0]) {
-                return $board[0][2];
-            }
-
-            return null;
         }
+        return true;
     }
+
+    private function checkWinner($board)
+    {
+        $lines = [
+            [[0, 0], [0, 1], [0, 2]],
+            [[1, 0], [1, 1], [1, 2]],
+            [[2, 0], [2, 1], [2, 2]],
+            [[0, 0], [1, 0], [2, 0]],
+            [[0, 1], [1, 1], [2, 1]],
+            [[0, 2], [1, 2], [2, 2]],
+            [[0, 0], [1, 1], [2, 2]],
+            [[0, 2], [1, 1], [2, 0]],
+        ];
+
+        foreach ($lines as $line) {
+            [$a, $b, $c] = $line;
+            if ($board[$a[0]][$a[1]] && $board[$a[0]][$a[1]] === $board[$b[0]][$b[1]] && $board[$a[0]][$a[1]] === $board[$c[0]][$c[1]]) {
+                return $board[$a[0]][$a[1]];
+            }
+        }
+
+        return null;
+    }
+}

@@ -1,15 +1,19 @@
 from flask import Flask, request, jsonify
-import random
+from brain import choose_move
 
 app = Flask(__name__)
+
 
 @app.route('/move', methods=['POST'])
 def bot_move():
     data = request.json
     board = data['board']
-    empty_cells = [(row, col) for row in range(3) for col in range(3) if board[row][col] is None]
-    move =  random.choice(empty_cells)if empty_cells else None
-    move = {'row': move[0], 'col': move[1]}
+    board = [[cell if cell is not None else '' for cell in row] for row in board]
+    best_move = choose_move(board)
+    if best_move:
+        move = {'row': best_move[0], 'col': best_move[1]}
+    else:
+        move = {'row': -1, 'col': -1} 
     return jsonify(move)
 
 if __name__ == '__main__':

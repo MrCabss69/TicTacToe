@@ -27,31 +27,32 @@ const startGame = () => {
     .catch(error => console.error('Error al iniciar el juego:', error));
 };
 
+
 function makeMove(row, col) {
     if (gameOver || document.querySelector(`[data-row="${row}"][data-col="${col}"]`).classList.contains('disabled')) {
         alert('Movimiento no permitido. Por favor, intenta de nuevo.');
         return; // Salir si el juego ya terminó o la celda está ocupada
     }
 
-    fetch('/api/game/move', { // Asegúrate de que esta ruta coincida con la definida en Laravel
+    fetch('/api/game/move', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            //'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify({ gameId, row, col, player: currentPlayer })
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Response from move API:', data); // Depuración de la respuesta de la API
+        console.log('Response from move API:', data);
         if (data.success) {
-            updateBoard(data.state.board); // Asegúrate de que esto refleje tanto el movimiento del jugador como el del bot
-    
+            updateBoard(data.state.board);
+            // Actualizar el jugador actual basado en la respuesta del servidor
+            currentPlayer = data.state.currentPlayer;
+            
             if (data.state.winner) {
                 alert(`Ganador: ${data.state.winner}`);
                 gameOver = true; // Finaliza el juego si hay un ganador
-            } else {
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X'; // Cambia el jugador
             }
         } else {
             console.error('Movimiento no permitido o error al procesar el movimiento');
@@ -59,6 +60,8 @@ function makeMove(row, col) {
     })
     .catch(error => console.error('Error:', error));
 }
+
+
 
 function updateBoard(board) {
     for (let row = 0; row < board.length; row++) {
