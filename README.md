@@ -1,21 +1,24 @@
 # Tic Tac Toe
 
-This project is a web implementation of the classic Tic Tac Toe game, allowing players to interact with a 3x3 board and play against another player on the same device. The backend is built with Laravel, taking advantage of its capabilities to handle game state, while the frontend uses JS to interact with the user and communicate with the server.
+This project is a web implementation of the classic Tic Tac Toe game, allowing players to play against an automated bot. The backend is built with Laravel, leveraging its features for game state management, and a Python bot that uses a Minimax algorithm with alpha-beta pruning to determine its moves. The frontend is responsible for the interactive user interface, facilitating player interaction with the game board.
 
 ## Characteristics
 
-- Tic Tac Toe game for two players on the same device.
-- Restart of the game and determination of the winner on the server.
-- Interactive user interface that reflects the current state of the game.
+- Single-player Tic Tac Toe game against an intelligent bot.
+- Game state management and winner determination handled by Laravel backend.
+- Interactive user interface reflecting the current game state, with moves made instantly visible.
+- Bot integration for automated opponent moves, providing a challenging gameplay experience.
 
 ## Used technology
 
-- Backend: Laravel (Specified Version)
-- Frontend: HTML, CSS, pure JavaScript
-- State Management: Laravel Session
+- **Backend**: Laravel (Specify Version)
+- **Frontend**: HTML, CSS, Vanilla JavaScript
+- **State Management**: Laravel Session
+- **Bot**: Python (Specify Version), Flask for API endpoint
 
 ## Project Structure
-```bash
+
+```plaintext
 /tictactoe
     /app
         /Http
@@ -32,7 +35,9 @@ This project is a web implementation of the classic Tic Tac Toe game, allowing p
     /routes
         web.php
 /python_bot
-    main.py
+    bot.py  # Main bot logic using Minimax algorithm
+    requirements.txt  # Python dependencies
+
 ```
 
 ## Configuration and Installation
@@ -70,3 +75,9 @@ The game should now be accessible at http://localhost:8000/game.
 - Win the Game: The first player to align three of their symbols vertically, horizontally or diagonally wins. The game will indicate the winner with a pop-up message.
 
 - Restart Game: After finishing a game, click "Start" again to restart.
+
+
+
+### 5. **Bot Integration**
+
+The Python bot is set up to run concurrently with the Laravel application. It listens for POST requests at http://localhost:5000/move and responds with the calculated move. Ensure both servers are running to enable the bot's functionality in the game.
