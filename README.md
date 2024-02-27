@@ -1,86 +1,44 @@
-# Tic Tac Toe
+# Youtube Playlist Downloader
 
-This project is a web implementation of the classic Tic Tac Toe game, allowing players to play against an automated bot. The backend is built with Laravel, leveraging its features for game state management, and a Python bot that uses a Minimax algorithm with alpha-beta pruning to determine its moves. The frontend is responsible for the interactive user interface, facilitating player interaction with the game board.
+This project allows you to download songs from **public** YouTube playlists in MP3 format and save them to a local folder. It uses the `pytube` library for downloading and `moviepy` for format conversion.
 
-![Example](o.gif)
+## Requirements
 
+Before you begin, make sure you have Python installed on your system. Additionally, you will need to install the following libraries:
 
+- pytube
+- movie
 
-## Characteristics
+You can install these dependencies with the following command:
 
-- Single-player Tic Tac Toe game against an intelligent bot.
-- Game state management and winner determination handled by Laravel backend.
-- Interactive user interface reflecting the current game state, with moves made instantly visible.
-- Bot integration for automated opponent moves, providing a challenging gameplay experience.
-
-## Used technology
-
-- **Backend**: Laravel (Specify Version)
-- **Frontend**: HTML, CSS, Vanilla JavaScript
-- **State Management**: Laravel Session
-- **Bot**: Python (Specify Version), Flask for API endpoint
-
-## Project Structure
-
-```plaintext
-/tictactoe
-    /app
-        /Http
-            /Controllers
-                GameController.php
-    /public
-        /css
-            game.css
-        /js
-            game.js
-    /resources
-        /views
-            game.blade.php
-    /routes
-        web.php
-/python_bot
-    brain.py  # Main bot logic using Minimax algorithm
-    bot.py    # flask api - ¡¡RUN THIS!!
+```tap
+pip install pytube moviepy
 ```
 
-## Configuration and Installation
+Finally, navigate to the playlist you want to download, and copy the id of the playlist you want to download (what appears to the right of list=)
 
-### 1. **Clone the Repository**
 
-```bash
-git clone repository-url
+
+
+## Usage
+
+To use this script, follow these steps:
+
+1. Clone this repository locally.
+
+2. Open a terminal or command line.
+
+3. Navigate to the directory where the script is located.
+
+4. Run the script with the YouTube playlist ID as an argument:
+
+```tap
+python3 download_playlist.py playlist_id --output output_directory
 ```
 
-### 2. **Install Composer Dependencies**
+Replace `[playlist ID]` with the actual ID of the YouTube playlist you want to download.
 
-From the project directory, run:
-
-
-```bash
-composer install
+## Example
+```tap
+python3 download_playlist.py playlist_id --output output_directory
 ```
-
-### 3. **Run Development Server**
-
-```bash
-php artisan serve
-```
-
-The game should now be accessible at http://localhost:8000/game.
-
-
-### 4. **Use**
-
-- Start a Game: Access the /game path in your browser. Click the "Start" button to start a new game.
-
-- Make a Move: Click on any empty cell to place your symbol (X or O).
-
-- Win the Game: The first player to align three of their symbols vertically, horizontally or diagonally wins. The game will indicate the winner with a pop-up message.
-
-- Restart Game: After finishing a game, click "Start" again to restart.
-
-
-
-### 5. **Bot Integration**
-
-The Python bot is set up to run concurrently with the Laravel application. It listens for POST requests at http://localhost:5000/move and responds with the calculated move. Ensure both servers are running to enable the bot's functionality in the game.

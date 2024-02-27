@@ -20,6 +20,7 @@ Route::get('/', function () {
 
 
 # GAME VIEW
+Route::get( '/', [GameController::class, 'show']);
 Route::get('/game', [GameController::class, 'show']);
 Route::post('/game/start', [GameController::class, 'start']);
 Route::post('/game/move', [GameController::class, 'move'])->name('game.move');

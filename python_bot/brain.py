@@ -101,5 +101,5 @@ def get_best_move(board: list, alfa: int = -1000000, beta: int = 1000000, depth:
                 
 def choose_move(board):
     # Esta función debería usar get_best_move para elegir el mejor movimiento
-    best_move,_ = get_best_move(board, alfa=-1000000, beta=1000000, depth=3)
+    best_move,_ = get_best_move(board, alfa=-1000000, beta=1000000, depth=6)
     return best_move
