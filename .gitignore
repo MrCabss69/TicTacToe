@@ -1,4 +1,6 @@
 # Ignore vendor directories
+*__pycache__*
+
 /vendor/
 
 # Ignore node_modules directory
